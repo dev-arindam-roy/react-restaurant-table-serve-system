@@ -6,6 +6,7 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import { FiPlus, FiEdit, FiTrash2 } from "react-icons/fi";
+import { toWords } from "number-to-words";
 
 const AppTable = ({
   onAddTable,
@@ -21,6 +22,7 @@ const AppTable = ({
 }) => {
   const [allTables, setAllTables] = useState([]);
   const [updateTableInfo, setUpdateTableInfo] = useState(null);
+  const [updateTabletotalAmount, setUpdateTabletotalAmount] = useState(0);
   const formSubmitButtonHandler = () => {
     document.getElementById("hiddenFormSubmitButton").click();
   };
@@ -37,6 +39,23 @@ const AppTable = ({
   const removeTableButtonHandler = (tableId) => {
     onRemoveTable(tableId);
   };
+  const calculateTotalAmount = () => {
+    let total = 0;
+    if (
+      updateTableInfo &&
+      Array.isArray(updateTableInfo.orders) &&
+      updateTableInfo.orders.length > 0
+    ) {
+      updateTableInfo.orders.forEach((item) => {
+        total += parseFloat(item.price) * parseFloat(item.qty);
+      });
+    }
+    return total.toFixed(2);
+  };
+  useEffect(() => {
+    const newTotalAmount = calculateTotalAmount();
+    setUpdateTabletotalAmount(newTotalAmount);
+  }, [updateTableInfo]);
   useEffect(() => {
     setAllTables(sendTableList);
   }, [sendTableList]);
@@ -73,17 +92,17 @@ const AppTable = ({
               {allTables.map((item, index) => {
                 return (
                   <Col
-                    md={3}
+                    md={4}
                     className="table-box text-center mb-2"
                     key={"table-box" + index}
                   >
-                    <div className="table-box-items">
+                    <div className="table-box-items" style={{backgroundColor: item?.orders.length > 0 ? '#cfffc1' : '#e8e6e6'}}>
                       <div className="table-no">
                         <label>{item?.name || "Table- " + (index + 1)}</label>
                       </div>
                       <div className="mt-2">
                         <p className="table-order">
-                          <label>Order-</label> {item?.orders.length || 0}
+                          <label>Items-</label> {item?.orders.length || 0}
                         </p>
                         <p className="table-bill">
                           <label>Bill-</label> {item?.bill || 0}
@@ -114,7 +133,7 @@ const AppTable = ({
       <Modal
         backdrop="static"
         keyboard={false}
-        size="lg"
+        size="xl"
         show={sendIsEditTableModalShow}
         onHide={editTableCloseModalHandler}
         centered
@@ -138,6 +157,22 @@ const AppTable = ({
                     required
                     disabled
                     readOnly
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="tableNumber">
+                  <Form.Control
+                    type="number"
+                    step="1"
+                    name="table_no"
+                    placeholder="Table Number"
+                    required
+                    value={updateTableInfo?.no || ""}
+                    onChange={(e) =>
+                      setUpdateTableInfo({
+                        ...updateTableInfo,
+                        no: e.target.value,
+                      })
+                    }
                   />
                 </Form.Group>
                 <Form.Group className="mb-3" controlId="tableName">
@@ -195,14 +230,81 @@ const AppTable = ({
                   />
                 </Form.Group>
               </Col>
-              <Col md={7}>
+              <Col md={7} style={{ fontFamily: "monospace" }}>
                 <Card>
                   <Card.Header>
                     <label>
                       <strong>Orders</strong>
                     </label>
                   </Card.Header>
-                  <Card.Body></Card.Body>
+                  <Card.Body>
+                    <table className="table table-sm table-border table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th>SL</th>
+                          <th>Food</th>
+                          <th>Price x QTY</th>
+                          <th>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {updateTableInfo &&
+                        updateTableInfo.orders &&
+                        updateTableInfo.orders.length > 0 ? (
+                          updateTableInfo.orders.map((item, index) => (
+                            <tr key={`order-row-${index}`}>
+                              <td>{index + 1}</td>
+                              <td>{item.name}</td>
+                              <td>
+                                {parseFloat(item.price).toFixed(2)} x{" "}
+                                {parseFloat(item.qty).toFixed(2)}
+                              </td>
+                              <td>
+                                {(
+                                  parseFloat(item.price).toFixed(2) *
+                                  parseFloat(item.qty).toFixed(2)
+                                ).toFixed(2)}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="4">No Orders Found</td>
+                          </tr>
+                        )}
+                      </tbody>
+                      {updateTableInfo &&
+                        updateTableInfo.orders &&
+                        updateTableInfo.orders.length > 0 && (
+                          <tfoot>
+                            <tr>
+                              <td colSpan={3}>
+                                <strong>Total Bill:</strong>
+                              </td>
+                              <td>
+                                <strong>{updateTabletotalAmount}</strong>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colSpan={3}>
+                                <strong>Total Payable:</strong>
+                              </td>
+                              <td>
+                                <strong>
+                                  {Math.round(updateTabletotalAmount)}
+                                </strong>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colSpan={4}>
+                                <strong>In Words:</strong>{" "}
+                                {toWords(updateTabletotalAmount)}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        )}
+                    </table>
+                  </Card.Body>
                 </Card>
               </Col>
             </Row>
@@ -235,7 +337,7 @@ const AppTable = ({
                 </Button>
                 <Button
                   variant="danger"
-                  className="mx-2"
+                  style={{ marginLeft: "5px" }}
                   onClick={() =>
                     removeTableButtonHandler(updateTableInfo?.id || "")
                   }

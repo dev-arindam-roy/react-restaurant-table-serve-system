@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
+import FoodMenu from "../jsons/food_menu.json";
 import AppHeading from "./AppHeading";
 import AppSettings from "./AppSettings";
 import AppTable from "./AppTable";
+import TableBillItems from "./TableBillItems";
+import AllBills from "./AllBills";
+import TakeOrders from "./TakeOrders";
 import { v4 as uuidv4 } from "uuid";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -17,9 +21,12 @@ const AppContainer = () => {
   const [tableList, setTableList] = useState([]);
   const [tableEditIndex, setTableEditIndex] = useState(null);
 
+  const [foodMenuList, setFoodMenuList] = useState([]);
+
   const emitOnAddTableHandler = () => {
     let createTable = {
       id: uuidv4(),
+      no: tableList.length + 1,
       name: "Table- " + (tableList.length + 1),
       customerName: "",
       customerPhoneNumber: "",
@@ -102,7 +109,7 @@ const AppContainer = () => {
           );
           if (getTableIndex !== -1) {
             tableList[getTableIndex].orders = [];
-            tableList[getTableIndex].bill = [];
+            tableList[getTableIndex].bill = 0;
             emitOnEditTableModalCloseHandler();
             saveTableInfoInLocalStorage(tableList);
             Swal.fire({
@@ -120,7 +127,7 @@ const AppContainer = () => {
               toast.success("All orders are cancelled successfully!");
             });
           } else {
-            toast.danger("Oops!! Something went wrong!");
+            toast.error("Oops!! Something went wrong!");
           }
         }
       });
@@ -169,7 +176,7 @@ const AppContainer = () => {
               toast.success("Table is removed successfully!");
             });
           } else {
-            toast.danger("Oops!! Something went wrong!");
+            toast.error("Oops!! Something went wrong!");
           }
         }
       });
@@ -217,6 +224,62 @@ const AppContainer = () => {
     setTable(null);
   };
 
+  const emitOnAddFoodToTableHandler = (table, food) => {
+    if (
+        table.id !== "" &&
+        table.id !== null &&
+        food.id !== "" &&
+        food.id !== null
+    ) {
+      let getTableIndex = tableList.findIndex((item) => item.id === table.id);
+      let getFoodMenuIndex = foodMenuList.findIndex((item) => item.id === parseInt(food.id));
+      if (getTableIndex !== -1 && getFoodMenuIndex !== -1) {
+        let getFood = foodMenuList[getFoodMenuIndex];
+        let getTable = tableList[getTableIndex];
+        let tempTableList = [...tableList];
+        let tempTableOrders = tempTableList[getTableIndex].orders;
+        let getExistingFoodMenuIndex = tempTableOrders.findIndex((item) => item.id === parseInt(food.id));
+        if (getExistingFoodMenuIndex !== -1) {
+            tempTableOrders[getExistingFoodMenuIndex].qty = parseFloat(tempTableOrders[getExistingFoodMenuIndex].qty) + parseFloat(food.qty);
+        } else {
+            tempTableOrders = [...tempTableOrders, {...getFood, qty: food.qty}];
+        }
+        tempTableList[getTableIndex].orders = tempTableOrders;
+        tempTableList[getTableIndex].bill = calculateEachTableBill(tempTableList[getTableIndex].orders);
+        setTableList(tempTableList);
+        saveTableInfoInLocalStorage(tempTableList);
+        Swal.fire({
+            title: "Please wait...",
+            html: "System is <strong>processing</strong> your request",
+            timer: 2000,
+            timerProgressBar: true,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+          }).then(() => {
+            Swal.close();
+            toast.success(`Table- ${getTable.no}, Order received successfully!`);
+          });
+      } else {
+        toast.error("Oops!! Something went wrong1!");
+      }
+    } else {
+      toast.error("Oops!! Something went wrong2!");
+    }
+  };
+
+  const calculateEachTableBill = (eachTableOrders) => {
+    let total = 0;
+    if (Array.isArray(eachTableOrders) && eachTableOrders.length > 0) {
+        eachTableOrders.forEach((item) => {
+        total += parseFloat(item.price) * parseFloat(item.qty);
+      });
+    }
+    return total.toFixed(2);
+  }
+
   const saveTableInfoInLocalStorage = (tableInfo) => {
     localStorage.setItem(lsKey + "_tables_", JSON.stringify(tableInfo));
   };
@@ -226,6 +289,10 @@ const AppContainer = () => {
     if (loadTables) {
       setTableList(JSON.parse(loadTables));
     }
+  }, []);
+
+  useEffect(() => {
+    setFoodMenuList(FoodMenu);
   }, []);
 
   return (
@@ -240,8 +307,28 @@ const AppContainer = () => {
           </Col>
         </Row>
         <Row className="mt-5">
-          <Col xs={12} sm={12} md={6} xl={6}></Col>
-          <Col xs={12} sm={12} md={6} xl={6}>
+          <Col xs={12} sm={12} md={7} xl={7}>
+            <Row>
+              <Col>
+                <TakeOrders
+                  sendTableList={tableList}
+                  sendFoodMenu={foodMenuList}
+                  onAddFoodToTable={emitOnAddFoodToTableHandler}
+                />
+              </Col>
+            </Row>
+            <Row className="mt-3">
+              <Col>
+                <TableBillItems />
+              </Col>
+            </Row>
+            <Row className="mt-3">
+              <Col>
+                <AllBills />
+              </Col>
+            </Row>
+          </Col>
+          <Col xs={12} sm={12} md={5} xl={5}>
             <AppTable
               onAddTable={emitOnAddTableHandler}
               onEditTable={emitOnEditTableHandler}

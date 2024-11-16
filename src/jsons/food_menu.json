@@ -1,0 +1,252 @@
+[
+    {
+        "id": 1,
+        "name": "Omelette",
+        "price": 46.8
+    },
+    {
+        "id": 2,
+        "name": "Tomato Soup",
+        "price": 28.75
+    },
+    {
+        "id": 3,
+        "name": "Nachos",
+        "price": 19.56
+    },
+    {
+        "id": 4,
+        "name": "Butter Chicken",
+        "price": 29.57
+    },
+    {
+        "id": 5,
+        "name": "Fried Rice",
+        "price": 17.96
+    },
+    {
+        "id": 6,
+        "name": "Ramen",
+        "price": 12.61
+    },
+    {
+        "id": 7,
+        "name": "Pad Thai",
+        "price": 33.52
+    },
+    {
+        "id": 8,
+        "name": "Nachos",
+        "price": 7.15
+    },
+    {
+        "id": 9,
+        "name": "French Fries",
+        "price": 32.08
+    },
+    {
+        "id": 10,
+        "name": "Chicken Tikka Masala",
+        "price": 39.59
+    },
+    {
+        "id": 11,
+        "name": "Pesto Pasta",
+        "price": 25.52
+    },
+    {
+        "id": 12,
+        "name": "Caesar Salad",
+        "price": 34.74
+    },
+    {
+        "id": 13,
+        "name": "Pancakes",
+        "price": 14.15
+    },
+    {
+        "id": 14,
+        "name": "Margherita Pizza",
+        "price": 19.05
+    },
+    {
+        "id": 15,
+        "name": "Pasta Carbonara",
+        "price": 39.98
+    },
+    {
+        "id": 16,
+        "name": "Caprese Salad",
+        "price": 48.49
+    },
+    {
+        "id": 17,
+        "name": "Margherita Pizza",
+        "price": 49.79
+    },
+    {
+        "id": 18,
+        "name": "Shrimp Cocktail",
+        "price": 18.11
+    },
+    {
+        "id": 19,
+        "name": "Chili Con Carne",
+        "price": 9.44
+    },
+    {
+        "id": 20,
+        "name": "Salmon Sashimi",
+        "price": 16.89
+    },
+    {
+        "id": 21,
+        "name": "Beef Steak",
+        "price": 15.02
+    },
+    {
+        "id": 22,
+        "name": "Garlic Bread",
+        "price": 45.99
+    },
+    {
+        "id": 23,
+        "name": "Meatballs",
+        "price": 21.58
+    },
+    {
+        "id": 24,
+        "name": "Caesar Salad",
+        "price": 41.48
+    },
+    {
+        "id": 25,
+        "name": "Chocolate Cake",
+        "price": 19.21
+    },
+    {
+        "id": 26,
+        "name": "French Fries",
+        "price": 35.65
+    },
+    {
+        "id": 27,
+        "name": "Hummus and Pita",
+        "price": 34.13
+    },
+    {
+        "id": 28,
+        "name": "Omelette",
+        "price": 17.21
+    },
+    {
+        "id": 29,
+        "name": "Stuffed Bell Peppers",
+        "price": 46.38
+    },
+    {
+        "id": 30,
+        "name": "Chicken Wings",
+        "price": 11.16
+    },
+    {
+        "id": 31,
+        "name": "Beef Steak",
+        "price": 14.17
+    },
+    {
+        "id": 32,
+        "name": "Falafel",
+        "price": 28.24
+    },
+    {
+        "id": 33,
+        "name": "Tomato Soup",
+        "price": 46.22
+    },
+    {
+        "id": 34,
+        "name": "Vegetable Stir Fry",
+        "price": 44.59
+    },
+    {
+        "id": 35,
+        "name": "Beef Steak",
+        "price": 38.78
+    },
+    {
+        "id": 36,
+        "name": "Salmon Sashimi",
+        "price": 25.8
+    },
+    {
+        "id": 37,
+        "name": "Pancakes",
+        "price": 8.58
+    },
+    {
+        "id": 38,
+        "name": "French Fries",
+        "price": 12.69
+    },
+    {
+        "id": 39,
+        "name": "Eggplant Parmesan",
+        "price": 13.51
+    },
+    {
+        "id": 40,
+        "name": "Chocolate Cake",
+        "price": 39.06
+    },
+    {
+        "id": 41,
+        "name": "Caesar Salad",
+        "price": 34.15
+    },
+    {
+        "id": 42,
+        "name": "Caesar Salad",
+        "price": 21.9
+    },
+    {
+        "id": 43,
+        "name": "Bagel with Cream Cheese",
+        "price": 48.06
+    },
+    {
+        "id": 44,
+        "name": "Stuffed Bell Peppers",
+        "price": 7.32
+    },
+    {
+        "id": 45,
+        "name": "Lasagna",
+        "price": 46.32
+    },
+    {
+        "id": 46,
+        "name": "Lamb Chops",
+        "price": 39.6
+    },
+    {
+        "id": 47,
+        "name": "Barbecue Ribs",
+        "price": 9.53
+    },
+    {
+        "id": 48,
+        "name": "Pulled Pork Sandwich",
+        "price": 34.04
+    },
+    {
+        "id": 49,
+        "name": "Omelette",
+        "price": 29.98
+    },
+    {
+        "id": 50,
+        "name": "Pulled Pork Sandwich",
+        "price": 15.1
+    }
+]
