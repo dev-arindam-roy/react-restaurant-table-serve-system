@@ -19,6 +19,7 @@ const AppTable = ({
   onCancelAllOrders,
   onRemoveTable,
   onDeleteAllTables,
+  onViewTableOrders,
 }) => {
   const [allTables, setAllTables] = useState([]);
   const [updateTableInfo, setUpdateTableInfo] = useState(null);
@@ -42,7 +43,7 @@ const AppTable = ({
   const calculateEachTableTotalAmount = () => {
     let total = 0;
     if (
-        updateTableInfo &&
+      updateTableInfo &&
       Array.isArray(updateTableInfo.orders) &&
       updateTableInfo.orders.length > 0
     ) {
@@ -53,15 +54,15 @@ const AppTable = ({
     return total.toFixed(2);
   };
   const calculateBusyTables = () => {
-    let busyTables = {totalNo: 0, totalBills: 0};
+    let busyTables = { totalNo: 0, totalBills: 0 };
     if (allTables.length > 0) {
-        allTables.forEach((itemObj) => {
-            busyTables.totalNo += (itemObj?.orders.length > 0) ? 1 : 0;
-            busyTables.totalBills += parseFloat(itemObj?.bill);
-        });
+      allTables.forEach((itemObj) => {
+        busyTables.totalNo += itemObj?.orders.length > 0 ? 1 : 0;
+        busyTables.totalBills += parseFloat(itemObj?.bill);
+      });
     }
     return busyTables;
-  }
+  };
 
   const busyTables = calculateBusyTables();
 
@@ -109,7 +110,14 @@ const AppTable = ({
                     className="table-box text-center mb-2"
                     key={"table-box" + index}
                   >
-                    <div className="table-box-items" style={{backgroundColor: item?.orders.length > 0 ? '#cfffc1' : '#e8e6e6'}}>
+                    <div
+                      className="table-box-items"
+                      style={{
+                        backgroundColor:
+                          item?.orders.length > 0 ? "#cfffc1" : "#e8e6e6",
+                      }}
+                      onClick={() => onViewTableOrders(item.id)}
+                    >
                       <div className="table-no">
                         <label>{item?.name || "Table- " + (index + 1)}</label>
                       </div>
@@ -141,12 +149,18 @@ const AppTable = ({
           )}
         </Card.Body>
         <Card.Footer>
-            <Row>
-                <Col>
-                <label><strong>Busy Table:</strong> - {busyTables?.totalNo || 0}</label>
-                 &nbsp; | <label><strong>OnGoing Bill Amounts:</strong> - Rs.{Math.round(busyTables.totalBills) || 0}</label>
-                </Col>
-            </Row>
+          <Row>
+            <Col>
+              <label>
+                <strong>Busy Table:</strong> - {busyTables?.totalNo || 0}
+              </label>
+              &nbsp; |{" "}
+              <label>
+                <strong>OnGoing Bill Amounts:</strong> - Rs.
+                {Math.round(busyTables.totalBills) || 0}
+              </label>
+            </Col>
+          </Row>
         </Card.Footer>
       </Card>
       {/* Edit Table Modal */}

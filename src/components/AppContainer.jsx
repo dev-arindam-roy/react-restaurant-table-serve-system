@@ -23,6 +23,8 @@ const AppContainer = () => {
 
   const [foodMenuList, setFoodMenuList] = useState([]);
 
+  const [eachTableOrdersInfo, setEachTableOrdersInfo] = useState(null);
+
   const emitOnAddTableHandler = () => {
     let createTable = {
       id: uuidv4(),
@@ -222,46 +224,55 @@ const AppContainer = () => {
   const emitOnEditTableModalCloseHandler = () => {
     setTableEditIndex(null);
     setTable(null);
+    setEachTableOrdersInfo(null);
   };
 
   const emitOnAddFoodToTableHandler = (table, food) => {
     if (
-        table.id !== "" &&
-        table.id !== null &&
-        food.id !== "" &&
-        food.id !== null
+      table.id !== "" &&
+      table.id !== null &&
+      food.id !== "" &&
+      food.id !== null
     ) {
       let getTableIndex = tableList.findIndex((item) => item.id === table.id);
-      let getFoodMenuIndex = foodMenuList.findIndex((item) => item.id === parseInt(food.id));
+      let getFoodMenuIndex = foodMenuList.findIndex(
+        (item) => item.id === parseInt(food.id)
+      );
       if (getTableIndex !== -1 && getFoodMenuIndex !== -1) {
         let getFood = foodMenuList[getFoodMenuIndex];
         let getTable = tableList[getTableIndex];
         let tempTableList = [...tableList];
         let tempTableOrders = tempTableList[getTableIndex].orders;
-        let getExistingFoodMenuIndex = tempTableOrders.findIndex((item) => item.id === parseInt(food.id));
+        let getExistingFoodMenuIndex = tempTableOrders.findIndex(
+          (item) => item.id === parseInt(food.id)
+        );
         if (getExistingFoodMenuIndex !== -1) {
-            tempTableOrders[getExistingFoodMenuIndex].qty = parseFloat(tempTableOrders[getExistingFoodMenuIndex].qty) + parseFloat(food.qty);
+          tempTableOrders[getExistingFoodMenuIndex].qty =
+            parseFloat(tempTableOrders[getExistingFoodMenuIndex].qty) +
+            parseFloat(food.qty);
         } else {
-            tempTableOrders = [...tempTableOrders, {...getFood, qty: food.qty}];
+          tempTableOrders = [...tempTableOrders, { ...getFood, qty: food.qty }];
         }
         tempTableList[getTableIndex].orders = tempTableOrders;
-        tempTableList[getTableIndex].bill = calculateEachTableBill(tempTableList[getTableIndex].orders);
+        tempTableList[getTableIndex].bill = calculateEachTableBill(
+          tempTableList[getTableIndex].orders
+        );
         setTableList(tempTableList);
         saveTableInfoInLocalStorage(tempTableList);
         Swal.fire({
-            title: "Please wait...",
-            html: "System is <strong>processing</strong> your request",
-            timer: 2000,
-            timerProgressBar: true,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-              Swal.showLoading();
-            },
-          }).then(() => {
-            Swal.close();
-            toast.success(`Table- ${getTable.no}, Order received successfully!`);
-          });
+          title: "Please wait...",
+          html: "System is <strong>processing</strong> your request",
+          timer: 2000,
+          timerProgressBar: true,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        }).then(() => {
+          Swal.close();
+          toast.success(`Table- ${getTable.no}, Order received successfully!`);
+        });
       } else {
         toast.error("Oops!! Something went wrong1!");
       }
@@ -273,12 +284,22 @@ const AppContainer = () => {
   const calculateEachTableBill = (eachTableOrders) => {
     let total = 0;
     if (Array.isArray(eachTableOrders) && eachTableOrders.length > 0) {
-        eachTableOrders.forEach((item) => {
+      eachTableOrders.forEach((item) => {
         total += parseFloat(item.price) * parseFloat(item.qty);
       });
     }
-    return total.toFixed(2);
-  }
+    return Math.round(total.toFixed(2));
+    //return total.toFixed(2);
+  };
+
+  const emitOnViewTableOrdersHandlers = (tableId) => {
+    let getTableIndex = tableList.findIndex((item) => item.id === tableId);
+    if (getTableIndex !== -1) {
+      setEachTableOrdersInfo(tableList[getTableIndex]);
+    } else {
+      toast.error("Oops!! Something went wrong2!");
+    }
+  };
 
   const saveTableInfoInLocalStorage = (tableInfo) => {
     localStorage.setItem(lsKey + "_tables_", JSON.stringify(tableInfo));
@@ -317,11 +338,13 @@ const AppContainer = () => {
                 />
               </Col>
             </Row>
-            <Row className="mt-3">
-              <Col>
-                <TableBillItems />
-              </Col>
-            </Row>
+            {eachTableOrdersInfo && eachTableOrdersInfo !== null && (
+              <Row className="mt-3">
+                <Col>
+                  <TableBillItems sendEachTableOrders={eachTableOrdersInfo} onCancelAllOrders={emitOnCancelAllOrdersHandler} />
+                </Col>
+              </Row>
+            )}
             <Row className="mt-3">
               <Col>
                 <AllBills />
@@ -340,6 +363,7 @@ const AppContainer = () => {
               onCancelAllOrders={emitOnCancelAllOrdersHandler}
               onRemoveTable={emitOnRemoveTableHandler}
               onDeleteAllTables={emitOnDeleteAllTablesHandler}
+              onViewTableOrders={emitOnViewTableOrdersHandlers}
             />
           </Col>
         </Row>

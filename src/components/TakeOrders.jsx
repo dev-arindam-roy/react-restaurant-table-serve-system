@@ -92,6 +92,7 @@ const TakeOrders = ({ sendTableList, sendFoodMenu, onAddFoodToTable }) => {
                 </label>
                 <input
                   type="number"
+                  min=".5"
                   step=".5"
                   className="form-control"
                   required

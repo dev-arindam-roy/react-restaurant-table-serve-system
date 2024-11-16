@@ -4,7 +4,7 @@ const AppHeading = () => {
   return (
     <>
       <h1 className="app-heading">
-        <strong>Restaurant Table Server System</strong>
+        <strong>Restaurant Table Serve System</strong>
       </h1>
     </>
   );
