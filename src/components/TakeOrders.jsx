@@ -32,7 +32,7 @@ const TakeOrders = ({ sendTableList, sendFoodMenu, onAddFoodToTable }) => {
     <>
       <Card>
         <Card.Header>
-          <strong>Take Orders</strong>
+          <strong>Take New Orders</strong>
         </Card.Header>
         <Card.Body>
           <Form onSubmit={formSubmitHandler}>

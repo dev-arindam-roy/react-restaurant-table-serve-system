@@ -39,10 +39,10 @@ const AppTable = ({
   const removeTableButtonHandler = (tableId) => {
     onRemoveTable(tableId);
   };
-  const calculateTotalAmount = () => {
+  const calculateEachTableTotalAmount = () => {
     let total = 0;
     if (
-      updateTableInfo &&
+        updateTableInfo &&
       Array.isArray(updateTableInfo.orders) &&
       updateTableInfo.orders.length > 0
     ) {
@@ -52,8 +52,21 @@ const AppTable = ({
     }
     return total.toFixed(2);
   };
+  const calculateBusyTables = () => {
+    let busyTables = {totalNo: 0, totalBills: 0};
+    if (allTables.length > 0) {
+        allTables.forEach((itemObj) => {
+            busyTables.totalNo += (itemObj?.orders.length > 0) ? 1 : 0;
+            busyTables.totalBills += parseFloat(itemObj?.bill);
+        });
+    }
+    return busyTables;
+  }
+
+  const busyTables = calculateBusyTables();
+
   useEffect(() => {
-    const newTotalAmount = calculateTotalAmount();
+    const newTotalAmount = calculateEachTableTotalAmount();
     setUpdateTabletotalAmount(newTotalAmount);
   }, [updateTableInfo]);
   useEffect(() => {
@@ -127,7 +140,14 @@ const AppTable = ({
             <p>No Tables Found! Please Add Table</p>
           )}
         </Card.Body>
-        <Card.Footer></Card.Footer>
+        <Card.Footer>
+            <Row>
+                <Col>
+                <label><strong>Busy Table:</strong> - {busyTables?.totalNo || 0}</label>
+                 &nbsp; | <label><strong>OnGoing Bill Amounts:</strong> - Rs.{Math.round(busyTables.totalBills) || 0}</label>
+                </Col>
+            </Row>
+        </Card.Footer>
       </Card>
       {/* Edit Table Modal */}
       <Modal
