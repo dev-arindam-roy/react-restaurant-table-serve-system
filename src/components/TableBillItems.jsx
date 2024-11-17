@@ -4,29 +4,36 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import { toWords } from "number-to-words";
+import { formatNumberWord } from '../helpers/Helpers';
+import { FiEdit, FiTrash2 } from "react-icons/fi";
 
-const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders }) => {
+const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders, onFoodMenuItemDelete }) => {
   const [eachTableOrders, setEachTableOrders] = useState(null);
   const [eachTableTotalBillAmount, setEachTableTotalBillAmount] = useState(0);
-  const calculateEachTableTotalAmount = () => {
+  // Calculate total amount based on the latest orders
+  const calculateEachTableTotalAmount = (eachTableDetails) => {
     let total = 0;
     if (
-      eachTableOrders &&
-      Array.isArray(eachTableOrders.orders) &&
-      eachTableOrders.orders.length > 0
+      eachTableDetails &&
+      Array.isArray(eachTableDetails.orders) &&
+      eachTableDetails.orders.length > 0
     ) {
-      eachTableOrders.orders.forEach((item) => {
+      eachTableDetails.orders.forEach((item) => {
         total += parseFloat(item.price) * parseFloat(item.qty);
       });
     }
     return total.toFixed(2);
   };
+  
   useEffect(() => {
-    const newTotalAmount = calculateEachTableTotalAmount();
-    setEachTableTotalBillAmount(newTotalAmount);
-  }, [eachTableOrders]);
-  useEffect(() => {
-    setEachTableOrders(sendEachTableOrders);
+    //console.log(sendEachTableOrders);
+    if (sendEachTableOrders) {
+      setEachTableOrders(sendEachTableOrders);
+
+      //Recalculate the total amount whenever sendEachTableOrders changes
+      const newTotalAmount = calculateEachTableTotalAmount(sendEachTableOrders);
+      setEachTableTotalBillAmount(newTotalAmount);
+    }
   }, [sendEachTableOrders]);
   return (
     <>
@@ -54,6 +61,7 @@ const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders }) => {
                   <th>Price</th>
                   <th>QTY</th>
                   <th>Total</th>
+                  <th style={{width: '65px', textAlign: 'right'}}>#</th>
                 </tr>
               </thead>
               <tbody>
@@ -72,6 +80,10 @@ const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders }) => {
                             parseFloat(item.price) * parseFloat(item.qty)
                           ).toFixed(2)}
                         </td>
+                        <td style={{width: '65px', textAlign: 'right'}}>
+                          <FiEdit className="icon-action-btn text-success" /> 
+                          <FiTrash2 className="icon-action-btn text-danger" style={{marginLeft: '8px'}} onClick={() => onFoodMenuItemDelete(eachTableOrders.id, item.id)} />
+                        </td>
                       </tr>
                     );
                   })}
@@ -79,15 +91,15 @@ const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders }) => {
               <tfoot>
                 <tr>
                   <th colSpan={4}>Total Bill Amount:</th>
-                  <th>{eachTableTotalBillAmount}</th>
+                  <th colSpan={2}>{eachTableTotalBillAmount}</th>
                 </tr>
                 <tr>
                   <th colSpan={4}>Total Payable Amount:</th>
-                  <th>{Math.round(eachTableTotalBillAmount)}</th>
+                  <th colSpan={2}>{Math.round(eachTableTotalBillAmount)}</th>
                 </tr>
                 <tr>
-                  <th colSpan={5}>
-                    In Words: {toWords(eachTableTotalBillAmount)}
+                  <th colSpan={6}>
+                    In Words: {formatNumberWord(toWords(eachTableTotalBillAmount))}
                   </th>
                 </tr>
               </tfoot>

@@ -113,6 +113,7 @@ const AppContainer = () => {
             tableList[getTableIndex].orders = [];
             tableList[getTableIndex].bill = 0;
             emitOnEditTableModalCloseHandler();
+            setEachTableOrdersInfo(null);
             saveTableInfoInLocalStorage(tableList);
             Swal.fire({
               title: "Please wait...",
@@ -162,6 +163,7 @@ const AppContainer = () => {
             );
             setTableList(updatedTableList);
             emitOnEditTableModalCloseHandler();
+            setEachTableOrdersInfo(null);
             saveTableInfoInLocalStorage(updatedTableList);
             Swal.fire({
               title: "Please wait...",
@@ -202,6 +204,7 @@ const AppContainer = () => {
       if (result.isConfirmed) {
         setTableList([]);
         emitOnEditTableModalCloseHandler();
+        setEachTableOrdersInfo(null);
         saveTableInfoInLocalStorage([]);
         Swal.fire({
           title: "Please wait...",
@@ -224,7 +227,7 @@ const AppContainer = () => {
   const emitOnEditTableModalCloseHandler = () => {
     setTableEditIndex(null);
     setTable(null);
-    setEachTableOrdersInfo(null);
+    //setEachTableOrdersInfo(null);
   };
 
   const emitOnAddFoodToTableHandler = (table, food) => {
@@ -234,31 +237,46 @@ const AppContainer = () => {
       food.id !== "" &&
       food.id !== null
     ) {
-      let getTableIndex = tableList.findIndex((item) => item.id === table.id);
-      let getFoodMenuIndex = foodMenuList.findIndex(
+      const getTableIndex = tableList.findIndex((item) => item.id === table.id);
+      const getFoodMenuIndex = foodMenuList.findIndex(
         (item) => item.id === parseInt(food.id)
       );
+
       if (getTableIndex !== -1 && getFoodMenuIndex !== -1) {
-        let getFood = foodMenuList[getFoodMenuIndex];
-        let getTable = tableList[getTableIndex];
-        let tempTableList = [...tableList];
+        const getFood = foodMenuList[getFoodMenuIndex];
+        const getTable = tableList[getTableIndex];
+
+        // Create a deep copy of tableList and the relevant nested objects
+        const tempTableList = tableList.map((table) => ({
+          ...table,
+          orders: [...table.orders], // Copy orders array for each table
+        }));
+
         let tempTableOrders = tempTableList[getTableIndex].orders;
-        let getExistingFoodMenuIndex = tempTableOrders.findIndex(
+        const getExistingFoodMenuIndex = tempTableOrders.findIndex(
           (item) => item.id === parseInt(food.id)
         );
+
         if (getExistingFoodMenuIndex !== -1) {
           tempTableOrders[getExistingFoodMenuIndex].qty =
             parseFloat(tempTableOrders[getExistingFoodMenuIndex].qty) +
             parseFloat(food.qty);
         } else {
-          tempTableOrders = [...tempTableOrders, { ...getFood, qty: food.qty }];
+          tempTableOrders.push({ ...getFood, qty: food.qty });
         }
+
         tempTableList[getTableIndex].orders = tempTableOrders;
         tempTableList[getTableIndex].bill = calculateEachTableBill(
           tempTableList[getTableIndex].orders
         );
+
+        // Uncomment these lines to explicitly update state
+        setEachTableOrdersInfo(tempTableList[getTableIndex]);
         setTableList(tempTableList);
         saveTableInfoInLocalStorage(tempTableList);
+        console.log("TABLE");
+        console.log(tableList);
+
         Swal.fire({
           title: "Please wait...",
           html: "System is <strong>processing</strong> your request",
@@ -271,13 +289,65 @@ const AppContainer = () => {
           },
         }).then(() => {
           Swal.close();
-          toast.success(`Table- ${getTable.no}, Order received successfully!`);
+          // Uncomment this for success notification
+          toast.success(`Table - ${getTable.no}, Order received successfully!`);
         });
       } else {
-        toast.error("Oops!! Something went wrong1!");
+        toast.error("Oops!! Something went wrong!");
       }
     } else {
-      toast.error("Oops!! Something went wrong2!");
+      toast.error("Oops!! Something went wrong!");
+    }
+  };
+
+  const emitOnFoodMenuItemDeleteHandler = (orderTableId, orderFoodMenuId) => {
+    if (orderTableId && orderFoodMenuId) {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You want to delete this menu?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#0d6efd",
+        cancelButtonColor: "#dc3545",
+        confirmButtonText: "Yes",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const getTableIndex = tableList.findIndex(
+            (item) => item.id === orderTableId
+          );
+
+          if (getTableIndex !== -1) {
+            // Create a deep copy of tableList and the relevant nested objects
+            const tempTableList = tableList.map((table) => ({
+              ...table,
+              orders: [...table.orders], // Deep copy of orders array
+            }));
+
+            // Get the specific table and update its orders
+            const getTable = tempTableList[getTableIndex];
+            const updatedTableOrderList = getTable.orders.filter(
+              (food) => food.id !== orderFoodMenuId
+            );
+
+            // Update the orders and recalculate the bill for the specific table
+            tempTableList[getTableIndex].orders = updatedTableOrderList;
+            tempTableList[getTableIndex].bill = calculateEachTableBill(
+              updatedTableOrderList
+            );
+
+            // Update the state with the new table list and table info
+            setEachTableOrdersInfo(tempTableList[getTableIndex]);
+            setTableList(tempTableList);
+            saveTableInfoInLocalStorage(tempTableList);
+          } else {
+            toast.error("Oops!! Something went wrong!");
+          }
+        }
+      });
+    } else {
+      toast.error("Invalid table or food item ID!");
     }
   };
 
@@ -341,7 +411,11 @@ const AppContainer = () => {
             {eachTableOrdersInfo && eachTableOrdersInfo !== null && (
               <Row className="mt-3">
                 <Col>
-                  <TableBillItems sendEachTableOrders={eachTableOrdersInfo} onCancelAllOrders={emitOnCancelAllOrdersHandler} />
+                  <TableBillItems
+                    sendEachTableOrders={eachTableOrdersInfo}
+                    onCancelAllOrders={emitOnCancelAllOrdersHandler}
+                    onFoodMenuItemDelete={emitOnFoodMenuItemDeleteHandler}
+                  />
                 </Col>
               </Row>
             )}
