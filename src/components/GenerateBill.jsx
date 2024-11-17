@@ -72,6 +72,7 @@ const GenerateBill = ({
             <label>
               <strong>Rs.{Math.round(totalTableBill)}</strong>
             </label>
+            <span style={{fontSize: '14px', marginLeft: '10px', color: '#b3b3b3'}}>Table - {generateTableBill?.no}</span>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body ref={printRef} id="printArea">

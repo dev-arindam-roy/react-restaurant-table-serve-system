@@ -146,7 +146,7 @@ const TableBillItems = ({
                     variant="danger"
                     onClick={() => onCancelAllOrders(eachTableOrders.id)}
                   >
-                    Calcell All Orders
+                    Cancel All Orders
                   </Button>
                 </Col>
               </Row>
