@@ -4,10 +4,16 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import { toWords } from "number-to-words";
-import { formatNumberWord } from '../helpers/Helpers';
+import { formatNumberWord } from "../helpers/Helpers";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 
-const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders, onFoodMenuItemDelete }) => {
+const TableBillItems = ({
+  sendEachTableOrders,
+  onCancelAllOrders,
+  onFoodMenuItemDelete,
+  onFoodMenuItemEdit,
+  onGenerateBill,
+}) => {
   const [eachTableOrders, setEachTableOrders] = useState(null);
   const [eachTableTotalBillAmount, setEachTableTotalBillAmount] = useState(0);
   // Calculate total amount based on the latest orders
@@ -24,7 +30,7 @@ const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders, onFoodMenuItem
     }
     return total.toFixed(2);
   };
-  
+
   useEffect(() => {
     //console.log(sendEachTableOrders);
     if (sendEachTableOrders) {
@@ -61,7 +67,7 @@ const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders, onFoodMenuItem
                   <th>Price</th>
                   <th>QTY</th>
                   <th>Total</th>
-                  <th style={{width: '65px', textAlign: 'right'}}>#</th>
+                  <th style={{ width: "65px", textAlign: "right" }}>#</th>
                 </tr>
               </thead>
               <tbody>
@@ -80,9 +86,20 @@ const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders, onFoodMenuItem
                             parseFloat(item.price) * parseFloat(item.qty)
                           ).toFixed(2)}
                         </td>
-                        <td style={{width: '65px', textAlign: 'right'}}>
-                          <FiEdit className="icon-action-btn text-success" /> 
-                          <FiTrash2 className="icon-action-btn text-danger" style={{marginLeft: '8px'}} onClick={() => onFoodMenuItemDelete(eachTableOrders.id, item.id)} />
+                        <td style={{ width: "65px", textAlign: "right" }}>
+                          <FiEdit
+                            className="icon-action-btn text-success"
+                            onClick={() =>
+                              onFoodMenuItemEdit(eachTableOrders.id, item.id)
+                            }
+                          />
+                          <FiTrash2
+                            className="icon-action-btn text-danger"
+                            style={{ marginLeft: "8px" }}
+                            onClick={() =>
+                              onFoodMenuItemDelete(eachTableOrders.id, item.id)
+                            }
+                          />
                         </td>
                       </tr>
                     );
@@ -99,7 +116,8 @@ const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders, onFoodMenuItem
                 </tr>
                 <tr>
                   <th colSpan={6}>
-                    In Words: {formatNumberWord(toWords(eachTableTotalBillAmount))}
+                    In Words:{" "}
+                    {formatNumberWord(toWords(eachTableTotalBillAmount))}
                   </th>
                 </tr>
               </tfoot>
@@ -114,7 +132,11 @@ const TableBillItems = ({ sendEachTableOrders, onCancelAllOrders, onFoodMenuItem
             <Card.Footer>
               <Row>
                 <Col className="text-start">
-                  <Button type="button" variant="success">
+                  <Button
+                    type="button"
+                    variant="success"
+                    onClick={() => onGenerateBill(eachTableOrders.id)}
+                  >
                     Generate Bill
                   </Button>
                 </Col>

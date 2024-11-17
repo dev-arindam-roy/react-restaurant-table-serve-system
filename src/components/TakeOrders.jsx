@@ -7,20 +7,31 @@ import Button from "react-bootstrap/Button";
 import Placeholder from "react-bootstrap/Placeholder";
 import { FiPlus, FiX } from "react-icons/fi";
 
-const TakeOrders = ({ sendTableList, sendFoodMenu, onAddFoodToTable }) => {
+const TakeOrders = ({
+  sendTableList,
+  sendFoodMenu,
+  onAddFoodToTable,
+  sendEditTableFoodMenu,
+}) => {
   const [foods, setFoods] = useState([]);
   const [tables, setTables] = useState([]);
   const [addFoodMenu, setAddFoodMenu] = useState({ id: "", qty: "1" });
   const [selectTable, setSelectTable] = useState({ id: "" });
+  const [isEdit, setIsEdit] = useState(false);
 
   const formSubmitHandler = (e) => {
     e.preventDefault();
-    onAddFoodToTable(selectTable, addFoodMenu);
+    onAddFoodToTable(selectTable, addFoodMenu, isEdit);
     setAddFoodMenu({ id: "", qty: "1" });
+    if (isEdit) {
+      setSelectTable({ id: "" });
+    }
+    setIsEdit(false);
   };
   const resetFormHandler = () => {
     setAddFoodMenu({ id: "", qty: "1" });
     setSelectTable({ id: "" });
+    setIsEdit(false);
   };
   useEffect(() => {
     setFoods(sendFoodMenu);
@@ -28,11 +39,23 @@ const TakeOrders = ({ sendTableList, sendFoodMenu, onAddFoodToTable }) => {
   useEffect(() => {
     setTables(sendTableList);
   }, [sendTableList]);
+  useEffect(() => {
+    if (sendEditTableFoodMenu && sendEditTableFoodMenu?.action) {
+      setSelectTable({ id: sendEditTableFoodMenu?.tableId });
+      if (sendEditTableFoodMenu.action === "edit") {
+        setAddFoodMenu({
+          id: sendEditTableFoodMenu?.foodMenuId,
+          qty: sendEditTableFoodMenu?.qty,
+        });
+        setIsEdit(true);
+      }
+    }
+  }, [sendEditTableFoodMenu]);
   return (
     <>
       <Card>
         <Card.Header>
-          <strong>Take New Orders</strong>
+          <strong>Take New Orders {isEdit && " - Edit Menu"}</strong>
         </Card.Header>
         <Card.Body>
           <Form onSubmit={formSubmitHandler}>
@@ -48,6 +71,7 @@ const TakeOrders = ({ sendTableList, sendFoodMenu, onAddFoodToTable }) => {
                   onChange={(e) =>
                     setSelectTable({ ...selectTable, id: e.target.value })
                   }
+                  disabled={isEdit}
                 >
                   <option value="">-Select Table-</option>
                   {tables.length > 0 &&
@@ -71,6 +95,7 @@ const TakeOrders = ({ sendTableList, sendFoodMenu, onAddFoodToTable }) => {
                   onChange={(e) =>
                     setAddFoodMenu({ ...addFoodMenu, id: e.target.value })
                   }
+                  disabled={isEdit}
                 >
                   <option value="">-Select Food-</option>
                   {foods.length > 0 &&

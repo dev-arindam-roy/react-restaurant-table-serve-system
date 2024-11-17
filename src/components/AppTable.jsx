@@ -7,7 +7,7 @@ import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import { FiPlus, FiEdit, FiTrash2 } from "react-icons/fi";
 import { toWords } from "number-to-words";
-import { formatNumberWord } from '../helpers/Helpers';
+import { formatNumberWord } from "../helpers/Helpers";
 
 const AppTable = ({
   onAddTable,
@@ -333,7 +333,9 @@ const AppTable = ({
                             <tr>
                               <td colSpan={4}>
                                 <strong>In Words:</strong>{" "}
-                                {formatNumberWord(toWords(updateTabletotalAmount))}
+                                {formatNumberWord(
+                                  toWords(updateTabletotalAmount)
+                                )}
                               </td>
                             </tr>
                           </tfoot>

@@ -6,6 +6,8 @@ import AppTable from "./AppTable";
 import TableBillItems from "./TableBillItems";
 import AllBills from "./AllBills";
 import TakeOrders from "./TakeOrders";
+import GenerateBill from "./GenerateBill";
+import AppLogin from "./AppLogin";
 import { v4 as uuidv4 } from "uuid";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -16,7 +18,40 @@ import "./App.css";
 
 const lsKey = process.env.REACT_APP_LOCAL_STORAGE_KEY;
 
+const authDetails = {
+  user: {
+    name: "",
+    username: process.env.REACT_APP_USERNAME,
+    password: process.env.REACT_APP_PASSWORD,
+  },
+  restaurant: {
+    name: "",
+    phoneNumber: "",
+    emailId: "",
+    address: "",
+  },
+  isAuth: true,
+};
+
+const resetAuthDetails = {
+  user: {
+    name: "",
+    username: process.env.REACT_APP_USERNAME,
+    password: process.env.REACT_APP_PASSWORD,
+  },
+  restaurant: {
+    name: "",
+    phoneNumber: "",
+    emailId: "",
+    address: "",
+  },
+  isAuth: true,
+};
+
 const AppContainer = () => {
+  const [authInfo, setAuthInfo] = useState(authDetails);
+  const [isAuthSettingsModalShow, setIsAuthSettingsModalShow] = useState(false);
+
   const [table, setTable] = useState(null);
   const [tableList, setTableList] = useState([]);
   const [tableEditIndex, setTableEditIndex] = useState(null);
@@ -24,6 +59,19 @@ const AppContainer = () => {
   const [foodMenuList, setFoodMenuList] = useState([]);
 
   const [eachTableOrdersInfo, setEachTableOrdersInfo] = useState(null);
+
+  const [editTableFoodMenu, setEditTableFoodMenu] = useState(null);
+
+  const [generateTableBill, setGenerateTableBill] = useState(null);
+
+  const checkAuth = () => {
+    const getAuthInfo = localStorage.getItem(lsKey + "_auth_info_") || null;
+    if (getAuthInfo) {
+      setAuthInfo(JSON.parse(getAuthInfo));
+    } else {
+      setAuthInfo(resetAuthDetails);
+    }
+  };
 
   const emitOnAddTableHandler = () => {
     let createTable = {
@@ -230,7 +278,7 @@ const AppContainer = () => {
     //setEachTableOrdersInfo(null);
   };
 
-  const emitOnAddFoodToTableHandler = (table, food) => {
+  const emitOnAddFoodToTableHandler = (table, food, isEditFood = false) => {
     if (
       table.id !== "" &&
       table.id !== null &&
@@ -258,9 +306,15 @@ const AppContainer = () => {
         );
 
         if (getExistingFoodMenuIndex !== -1) {
-          tempTableOrders[getExistingFoodMenuIndex].qty =
-            parseFloat(tempTableOrders[getExistingFoodMenuIndex].qty) +
-            parseFloat(food.qty);
+          if (isEditFood) {
+            tempTableOrders[getExistingFoodMenuIndex].qty = parseFloat(
+              food.qty
+            );
+          } else {
+            tempTableOrders[getExistingFoodMenuIndex].qty =
+              parseFloat(tempTableOrders[getExistingFoodMenuIndex].qty) +
+              parseFloat(food.qty);
+          }
         } else {
           tempTableOrders.push({ ...getFood, qty: food.qty });
         }
@@ -347,7 +401,40 @@ const AppContainer = () => {
         }
       });
     } else {
-      toast.error("Invalid table or food item ID!");
+      toast.error("Oops!! Something went wrong!");
+    }
+  };
+
+  const emitOnFoodMenuItemEditHandler = (orderTableId, orderFoodMenuId) => {
+    if (orderTableId && orderFoodMenuId) {
+      const getTableIndex = tableList.findIndex(
+        (item) => item.id === orderTableId
+      );
+      if (getTableIndex !== -1) {
+        // Create a deep copy of tableList and the relevant nested objects
+        const tempTableList = tableList.map((table) => ({
+          ...table,
+          orders: [...table.orders], // Deep copy of orders array
+        }));
+        const getTable = tempTableList[getTableIndex];
+        const getFoodItem = getTable?.orders.find(
+          (item) => item.id === orderFoodMenuId
+        );
+        if (getFoodItem) {
+          setEditTableFoodMenu({
+            tableId: getTable.id,
+            foodMenuId: orderFoodMenuId,
+            qty: getFoodItem?.qty,
+            action: "edit",
+          });
+        } else {
+          toast.error("Oops!! Something went wrong!");
+        }
+      } else {
+        toast.error("Oops!! Something went wrong!");
+      }
+    } else {
+      toast.error("Oops!! Something went wrong!");
     }
   };
 
@@ -366,14 +453,144 @@ const AppContainer = () => {
     let getTableIndex = tableList.findIndex((item) => item.id === tableId);
     if (getTableIndex !== -1) {
       setEachTableOrdersInfo(tableList[getTableIndex]);
+      setEditTableFoodMenu({
+        tableId: tableList[getTableIndex]?.id,
+        action: "view",
+      });
     } else {
       toast.error("Oops!! Something went wrong2!");
     }
   };
 
+  const emitOnGenerateBillHandler = (tableId) => {
+    if (tableId) {
+      const getTableIndex = tableList.findIndex((item) => item.id === tableId);
+      if (getTableIndex !== -1) {
+        const tempTableList = tableList.map((table) => ({
+          ...table,
+          orders: [...table.orders],
+        }));
+        const getTableWithOrders = tempTableList[getTableIndex];
+        Swal.fire({
+          title: "Please wait...",
+          html: "System is <strong>processing</strong> your request",
+          timer: 2000,
+          timerProgressBar: true,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        }).then(() => {
+          Swal.close();
+          setGenerateTableBill(getTableWithOrders);
+          toast.success(
+            `Table - ${getTableWithOrders.no}, Bill has Generated successfully!`
+          );
+        });
+      } else {
+        toast.error("Oops!! Something went wrong!");
+      }
+    } else {
+      toast.error("Oops!! Something went wrong!");
+    }
+  };
+
+  const emitOnCloseGenerateBillModalHandler = () => {
+    setGenerateTableBill(null);
+  };
+
+  const emitOnPaymentReceivedOrderCloseHandler = (tableId) => {
+    if (tableId) {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You have received the payment & close the order?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#0d6efd",
+        cancelButtonColor: "#dc3545",
+        confirmButtonText: "Yes",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          let getTableIndex = tableList.findIndex(
+            (item) => item.id === tableId
+          );
+          if (getTableIndex !== -1) {
+            const tempTableList = tableList.map((table) => ({
+              ...table,
+              orders: [...table.orders],
+            }));
+            tempTableList[getTableIndex].orders = [];
+            tempTableList[getTableIndex].bill = 0;
+            setTableList(tempTableList);
+            setEachTableOrdersInfo(null);
+            emitOnEditTableModalCloseHandler();
+            emitOnCloseGenerateBillModalHandler();
+            saveTableInfoInLocalStorage(tempTableList);
+            Swal.fire({
+              icon: "success",
+              title: "Done!",
+              text: "Order has been successfully closed",
+              showConfirmButton: true,
+            });
+          } else {
+            toast.error("Oops!! Something went wrong!");
+          }
+        }
+      });
+    } else {
+      toast.error("Oops!! Something went wrong!");
+    }
+  };
+
+  const emitOnDoLoginHandler = (authLoginInfoObj) => {
+    if (
+      authLoginInfoObj?.user?.username === process.env.REACT_APP_USERNAME &&
+      authLoginInfoObj?.user?.password === process.env.REACT_APP_PASSWORD
+    ) {
+      const tempAuthInfo = { ...authLoginInfoObj };
+      tempAuthInfo.isAuth = false;
+      localStorage.setItem(lsKey + "_auth_info_", JSON.stringify(tempAuthInfo));
+      setAuthInfo(tempAuthInfo);
+    } else {
+      toast.error("Oops!! Username & Password combination is wrong");
+    }
+  };
+
+  const emitOnAuthSettingsHandler = () => {
+    setIsAuthSettingsModalShow(true);
+  };
+
+  const emitOnCloseSettingsModalHandler = () => {
+    setIsAuthSettingsModalShow(false);
+  };
+
+  const emitOnSaveSettingsHandler = (updatedSettingsInfo) => {
+    const tempAuthInfo = { ...updatedSettingsInfo };
+    localStorage.setItem(lsKey + "_auth_info_", JSON.stringify(tempAuthInfo));
+    setAuthInfo(tempAuthInfo);
+    setIsAuthSettingsModalShow(false);
+    toast.success("Settings are saved successfully");
+  };
+
   const saveTableInfoInLocalStorage = (tableInfo) => {
     localStorage.setItem(lsKey + "_tables_", JSON.stringify(tableInfo));
   };
+
+  const emitOnAuthlogoutHandler = () => {
+    localStorage.setItem(
+      lsKey + "_auth_info_",
+      JSON.stringify(resetAuthDetails)
+    );
+    setAuthInfo(resetAuthDetails);
+    toast.success("You have successfully logged out");
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const loadTables = localStorage.getItem(lsKey + "_tables_");
@@ -394,7 +611,14 @@ const AppContainer = () => {
             <AppHeading />
           </Col>
           <Col xs={12} sm={12} md={6} xl={6}>
-            <AppSettings />
+            <AppSettings
+              sendAuthInfo={authInfo}
+              onAuthlogout={emitOnAuthlogoutHandler}
+              onAuthSettings={emitOnAuthSettingsHandler}
+              sendAuthSettingsModalState={isAuthSettingsModalShow}
+              onCloseSettingsModal={emitOnCloseSettingsModalHandler}
+              onSaveSettings={emitOnSaveSettingsHandler}
+            />
           </Col>
         </Row>
         <Row className="mt-5">
@@ -405,6 +629,7 @@ const AppContainer = () => {
                   sendTableList={tableList}
                   sendFoodMenu={foodMenuList}
                   onAddFoodToTable={emitOnAddFoodToTableHandler}
+                  sendEditTableFoodMenu={editTableFoodMenu}
                 />
               </Col>
             </Row>
@@ -415,11 +640,13 @@ const AppContainer = () => {
                     sendEachTableOrders={eachTableOrdersInfo}
                     onCancelAllOrders={emitOnCancelAllOrdersHandler}
                     onFoodMenuItemDelete={emitOnFoodMenuItemDeleteHandler}
+                    onFoodMenuItemEdit={emitOnFoodMenuItemEditHandler}
+                    onGenerateBill={emitOnGenerateBillHandler}
                   />
                 </Col>
               </Row>
             )}
-            <Row className="mt-3">
+            <Row className="mt-3 d-none">
               <Col>
                 <AllBills />
               </Col>
@@ -442,6 +669,13 @@ const AppContainer = () => {
           </Col>
         </Row>
       </Container>
+      <GenerateBill
+        sendGenerateTableBill={generateTableBill}
+        onCloseGenerateBillModal={emitOnCloseGenerateBillModalHandler}
+        onPaymentReceivedOrderClose={emitOnPaymentReceivedOrderCloseHandler}
+        sendAuthDetails={authInfo}
+      />
+      <AppLogin sendAuthDetails={authInfo} onDoLogin={emitOnDoLoginHandler} />
     </>
   );
 };
