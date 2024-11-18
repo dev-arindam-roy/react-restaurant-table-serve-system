@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/react-restaurant-table-serve-system/static/css/main.87bae868.css",
-    "main.js": "/react-restaurant-table-serve-system/static/js/main.ad1b8199.js",
-    "static/js/453.adcbcc60.chunk.js": "/react-restaurant-table-serve-system/static/js/453.adcbcc60.chunk.js",
+    "main.css": "/react-restaurant-table-serve-system/static/css/main.3f37a897.css",
+    "main.js": "/react-restaurant-table-serve-system/static/js/main.dcb34781.js",
+    "static/js/453.4cf8179f.chunk.js": "/react-restaurant-table-serve-system/static/js/453.4cf8179f.chunk.js",
     "index.html": "/react-restaurant-table-serve-system/index.html",
-    "main.87bae868.css.map": "/react-restaurant-table-serve-system/static/css/main.87bae868.css.map",
-    "main.ad1b8199.js.map": "/react-restaurant-table-serve-system/static/js/main.ad1b8199.js.map",
-    "453.adcbcc60.chunk.js.map": "/react-restaurant-table-serve-system/static/js/453.adcbcc60.chunk.js.map"
+    "main.3f37a897.css.map": "/react-restaurant-table-serve-system/static/css/main.3f37a897.css.map",
+    "main.dcb34781.js.map": "/react-restaurant-table-serve-system/static/js/main.dcb34781.js.map",
+    "453.4cf8179f.chunk.js.map": "/react-restaurant-table-serve-system/static/js/453.4cf8179f.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.87bae868.css",
-    "static/js/main.ad1b8199.js"
+    "static/css/main.3f37a897.css",
+    "static/js/main.dcb34781.js"
   ]
 }
