@@ -8,7 +8,7 @@ import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { toWords } from "number-to-words";
-import { formatNumberWord } from "../helpers/Helpers";
+import { formatNumberWord, getFormattedTime } from "../helpers/Helpers";
 import { FiArchive } from "react-icons/fi";
 
 const GenerateBill = ({
@@ -72,14 +72,31 @@ const GenerateBill = ({
             <label>
               <strong>Rs.{Math.round(totalTableBill)}</strong>
             </label>
-            <span style={{fontSize: '14px', marginLeft: '10px', color: '#b3b3b3'}}>Table - {generateTableBill?.no}</span>
+            <span
+              style={{ fontSize: "14px", marginLeft: "10px", color: "#b3b3b3" }}
+            >
+              Table - {generateTableBill?.no}
+            </span>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body ref={printRef} id="printArea">
           <Card>
             <Card.Header style={{ paddingTop: "20px" }}>
               <Row>
-                <Col style={{ textAlign: "center" }}>
+                <Col
+                  md={
+                    generateTableBill?.customerName &&
+                    generateTableBill.customerName !== ""
+                      ? "7"
+                      : "12"
+                  }
+                  style={{
+                    textAlign: "center",
+                    wordWrap: "break-word",
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                  }}
+                >
                   {sendAuthDetails?.restaurant && (
                     <p>
                       <label style={{ fontSize: "20px" }}>
@@ -111,6 +128,39 @@ const GenerateBill = ({
                       )}
                     </p>
                   )}
+                </Col>
+                <Col
+                  md={5}
+                  style={{ textAlign: "right" }}
+                  className={
+                    generateTableBill?.customerName &&
+                    generateTableBill.customerName !== ""
+                      ? "d-block"
+                      : "d-none"
+                  }
+                >
+                  <p style={{ fontSize: "14px" }}>
+                    <label>
+                      <strong>Customer Name:</strong>{" "}
+                      {generateTableBill?.customerName}
+                    </label>
+                    <br />
+                    <label>
+                      <strong>Contact Number:</strong>{" "}
+                      {generateTableBill?.customerPhoneNumber}
+                    </label>
+                    <br />
+                    <label>
+                      <strong>Table Booking:</strong>{" "}
+                      {new Date(generateTableBill?.bookDate).toLocaleDateString(
+                        "en-GB"
+                      )}{" "}
+                      {new Date(generateTableBill?.bookTime).toLocaleTimeString(
+                        "en-US",
+                        { hour: "numeric", minute: "2-digit", hour12: true }
+                      )}
+                    </label>
+                  </p>
                 </Col>
               </Row>
             </Card.Header>
@@ -181,6 +231,22 @@ const GenerateBill = ({
             </Card.Body>
             <Card.Footer style={{ paddingBottom: "20px" }}>
               <Row>
+                <Col
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: "#ccc",
+                  }}
+                >
+                  {new Date(getFormattedTime())
+                    .toLocaleString("en-GB", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                      hour12: true,
+                    })
+                    .replace(",", "")
+                    .toLocaleUpperCase()}
+                </Col>
                 <Col
                   className="text-align-right"
                   style={{

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
@@ -25,6 +27,7 @@ const AppTable = ({
   const [allTables, setAllTables] = useState([]);
   const [updateTableInfo, setUpdateTableInfo] = useState(null);
   const [updateTabletotalAmount, setUpdateTabletotalAmount] = useState(0);
+
   const formSubmitButtonHandler = () => {
     document.getElementById("hiddenFormSubmitButton").click();
   };
@@ -77,6 +80,7 @@ const AppTable = ({
   useEffect(() => {
     setUpdateTableInfo(sendEditTableInfo);
   }, [sendEditTableInfo]);
+
   return (
     <>
       <Card>
@@ -173,6 +177,7 @@ const AppTable = ({
         onHide={editTableCloseModalHandler}
         centered
         scrollable
+        id="tableDetailsModal"
       >
         <Modal.Header closeButton>
           <Modal.Title>
@@ -263,6 +268,76 @@ const AppTable = ({
                       })
                     }
                   />
+                </Form.Group>
+                <Form.Group
+                  className="mb-3"
+                  controlId="tableCustomerTableBookDate"
+                >
+                  <label>
+                    <strong>Table Book Date:</strong>
+                  </label>
+                  <div style={{ width: "100%" }}>
+                    <DatePicker
+                      dateFormat="yyyy/MM/dd"
+                      placeholderText="Select Date"
+                      className="form-control w-100"
+                      peekNextMonth
+                      showMonthDropdown
+                      showMonthYearDropdown
+                      selected={
+                        updateTableInfo?.bookDate
+                          ? new Date(updateTableInfo.bookDate)
+                          : new Date()
+                      }
+                      onChange={(date) =>
+                        setUpdateTableInfo({
+                          ...updateTableInfo,
+                          bookDate: date,
+                        })
+                      }
+                      minDate={
+                        new Date(new Date().setMonth(new Date().getMonth() - 3))
+                      }
+                      maxDate={
+                        new Date(new Date().setMonth(new Date().getMonth() + 3))
+                      }
+                      disabled={false}
+                      popperClassName="table-modal-datepicker-container"
+                      dropdownMode="select"
+                      //portalId="tableDetailsModal"
+                    />
+                  </div>
+                </Form.Group>
+                <Form.Group
+                  className="mb-3"
+                  controlId="tableCustomerTableBookTime"
+                >
+                  <label>
+                    <strong>Table Book Time:</strong>
+                  </label>
+                  <div style={{ width: "100%" }}>
+                    <DatePicker
+                      placeholderText="Select Time"
+                      className="form-control w-100"
+                      selected={
+                        updateTableInfo?.bookTime
+                          ? new Date(updateTableInfo.bookTime)
+                          : new Date()
+                      }
+                      onChange={(time) =>
+                        setUpdateTableInfo({
+                          ...updateTableInfo,
+                          bookTime: time,
+                        })
+                      }
+                      showTimeSelect
+                      showTimeSelectOnly
+                      timeIntervals={15}
+                      timeCaption="Time"
+                      dateFormat="h:mm aa"
+                      //portalId="tableDetailsModal"
+                    />
+                  </div>
                 </Form.Group>
               </Col>
               <Col md={7} style={{ fontFamily: "monospace" }}>

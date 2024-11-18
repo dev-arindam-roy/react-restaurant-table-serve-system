@@ -14,6 +14,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import { getFormattedDate, getFormattedTime } from '../helpers/Helpers';
 import "./App.css";
 
 const lsKey = process.env.REACT_APP_LOCAL_STORAGE_KEY;
@@ -317,6 +318,8 @@ const AppContainer = () => {
           }
         } else {
           tempTableOrders.push({ ...getFood, qty: food.qty });
+          tempTableList[getTableIndex].bookDate = getFormattedDate();
+          tempTableList[getTableIndex].bookTime = getFormattedTime();
         }
 
         tempTableList[getTableIndex].orders = tempTableOrders;
