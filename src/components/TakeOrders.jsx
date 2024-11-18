@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import SelectDropDown from "../utils/SelectDropDown";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
@@ -13,41 +14,78 @@ const TakeOrders = ({
   onAddFoodToTable,
   sendEditTableFoodMenu,
 }) => {
+  //onload
   const [foods, setFoods] = useState([]);
   const [tables, setTables] = useState([]);
+
+  //add & edit
   const [addFoodMenu, setAddFoodMenu] = useState({ id: "", qty: "1" });
-  const [selectTable, setSelectTable] = useState({ id: "" });
+  const [addTable, setAddTable] = useState({ id: "" });
+
+  //check edit
   const [isEdit, setIsEdit] = useState(false);
 
+  const selectTableHandleChange = (selectedTableObj) => {
+    setAddTable({ id: selectedTableObj.value });
+  };
+
+  const selectFoodMenuHandleChange = (selectedFoodMenuObj) => {
+    setAddFoodMenu({ ...addFoodMenu, id: selectedFoodMenuObj.value });
+  };
+
+  //form submit
   const formSubmitHandler = (e) => {
     e.preventDefault();
-    onAddFoodToTable(selectTable, addFoodMenu, isEdit);
+    onAddFoodToTable(addTable, addFoodMenu, isEdit);
     setAddFoodMenu({ id: "", qty: "1" });
     if (isEdit) {
-      setSelectTable({ id: "" });
+      setAddTable({ id: "" });
     }
     setIsEdit(false);
   };
+
+  //reset form
   const resetFormHandler = () => {
     setAddFoodMenu({ id: "", qty: "1" });
-    setSelectTable({ id: "" });
+    setAddTable({ id: "" });
     setIsEdit(false);
   };
+
+  /** Load food list */
   useEffect(() => {
-    setFoods(sendFoodMenu);
+    const foodArr = [];
+    sendFoodMenu.forEach((item) => {
+      foodArr.push({ value: item.id, label: item.name });
+    });
+    setFoods(foodArr);
   }, [sendFoodMenu]);
+
+  /** Load table list */
   useEffect(() => {
-    setTables(sendTableList);
+    const tableArr = [];
+    sendTableList.forEach((item) => {
+      tableArr.push({ value: item.id, label: item.name });
+    });
+    setTables(tableArr);
   }, [sendTableList]);
+
+  /** In edit mode & view mode pre-select table and food */
   useEffect(() => {
     if (sendEditTableFoodMenu && sendEditTableFoodMenu?.action) {
-      setSelectTable({ id: sendEditTableFoodMenu?.tableId });
+      setAddTable({ id: sendEditTableFoodMenu?.tableId });
       if (sendEditTableFoodMenu.action === "edit") {
         setAddFoodMenu({
           id: sendEditTableFoodMenu?.foodMenuId,
           qty: sendEditTableFoodMenu?.qty,
         });
         setIsEdit(true);
+      }
+      if (sendEditTableFoodMenu.action === "view") {
+        setAddFoodMenu({
+          id: "",
+          qty: 1,
+        });
+        setIsEdit(false);
       }
     }
   }, [sendEditTableFoodMenu]);
@@ -64,52 +102,41 @@ const TakeOrders = ({
                 <label>
                   <strong>Table:</strong>
                 </label>
-                <select
-                  className="form-control"
-                  required
-                  value={selectTable.id}
-                  onChange={(e) =>
-                    setSelectTable({ ...selectTable, id: e.target.value })
+                <SelectDropDown
+                  name="table"
+                  options={tables}
+                  placeholder="Select Table"
+                  isSearchable
+                  value={
+                    tables.find((table) => table.value === addTable.id) || null
                   }
-                  disabled={isEdit}
-                >
-                  <option value="">-Select Table-</option>
-                  {tables.length > 0 &&
-                    tables.map((item, index) => {
-                      return (
-                        <option key={"table-option-" + index} value={item.id}>
-                          {item.name}
-                        </option>
-                      );
-                    })}
-                </select>
+                  //defaultValue={selectTable?.id}
+                  onChange={selectTableHandleChange}
+                  noOptionsMessage={() => "No Table Found"}
+                  isDisabled={isEdit}
+                  isClearable
+                  required
+                />
               </Col>
               <Col md={4}>
                 <label>
                   <strong>Food Menu:</strong>
                 </label>
-                <select
-                  className="form-control"
-                  required
-                  value={addFoodMenu.id}
-                  onChange={(e) =>
-                    setAddFoodMenu({ ...addFoodMenu, id: e.target.value })
+                <SelectDropDown
+                  name="foodmenu"
+                  options={foods}
+                  placeholder="Select Menu"
+                  isSearchable
+                  value={
+                    foods.find((food) => food.value === addFoodMenu.id) || null
                   }
-                  disabled={isEdit}
-                >
-                  <option value="">-Select Food-</option>
-                  {foods.length > 0 &&
-                    foods.map((item, index) => {
-                      return (
-                        <option
-                          key={"foodmenu-option-" + index}
-                          value={item.id}
-                        >
-                          {item.name}
-                        </option>
-                      );
-                    })}
-                </select>
+                  //defaultValue={addFoodMenu?.id}
+                  onChange={selectFoodMenuHandleChange}
+                  noOptionsMessage={() => "No Food Found"}
+                  isDisabled={isEdit}
+                  isClearable
+                  required
+                />
               </Col>
               <Col md={2}>
                 <label>
